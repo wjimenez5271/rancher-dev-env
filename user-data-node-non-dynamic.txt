@@ -5,7 +5,10 @@ node_hostname=rancher-node-$uuid
 echo "HOSTNAME=$node_hostname" >> /etc/sysconfig/network
 echo "127.0.0.1  $node_hostname" >> /etc/hosts
 hostname $node_hostname
-sudo yum -y install docker-1.12.6-1.17.amzn1
 sudo yum install -y yum-utils
-/etc/init.d/docker start
-docker run -d --restart=unless-stopped -p 8080:8080 --name=rancher-server rancher/server
+sudo yum-config-manager \
+    --add-repo \
+    https://download.docker.com/linux/centos/docker-ce.repo
+sudo yum makecache fast
+yum -y install docker-ce.x86_64
+sudo systemctl start docker/etc/init.d/docker start

@@ -1,35 +1,34 @@
-# Expects this variable to be set as environment variable TF_VAR_digitalocean_token or through CLI
-# see https://www.terraform.io/docs/configuration/variables.html
-variable "digitalocean_token" {}
+provider "aws" {
+  region     = "us-west-2"
+  shared_credentials_file = "/Users/wjimenez/.aws/credentials"
 
-# Configure the DigitalOcean Provider
-provider "digitalocean" {
-    token = "${var.digitalocean_token}"
 }
 
-resource "digitalocean_droplet" "server" {
-    image = "ubuntu-16-04-x64"
-    name = "rancher-server"
-    region = "nyc2"
-    size = "2gb"
-    backups = false
-    user_data = "${file("user-data-server.txt")}"
-    ssh_keys = [7093539]
+resource "aws_instance" "server" {
+  ami           = "ami-6d1c2007"
+  instance_type = "m4.large"
+
+  tags {
+    Name = "William-Swarm-server"
+  }
+  user_data = "${file("user-data-server.txt")}"
+  key_name = "william"
+  vpc_security_group_ids = ["sg-eb4f278e","sg-48efe630"]
 }
 
-provider "rancher" {
-  api_url = "http://${digitalocean_droplet.server.ipv4_address}:8080"
+/*provider "rancher" {
+  api_url = "http://${aws_instance.server.public_dns}:8080"
 }
 
 resource "rancher_environment" "default" {
-  depends_on = ["digitalocean_droplet.server"]
+  depends_on = ["aws_instance.server"]
   name = "env1"
   description = "The Default environment"
   orchestration = "cattle"
 }
 
 resource "rancher_registration_token" "default" {
-  depends_on = ["digitalocean_droplet.server"]
+  depends_on = ["aws_instance.server"]
   name = "default_token"
   description = "Registration token for the env1 environment"
   environment_id = "${rancher_environment.default.id}"
@@ -40,15 +39,18 @@ data "template_file" "node_user_data" {
     vars {
         rancher_registration_cmd = "${rancher_registration_token.default.command}"
     }
-}
+}*/
 
-resource "digitalocean_droplet" "rancher_node" {
-    count = "2"
-    image = "ubuntu-16-04-x64"
-    name = "rancher_node${count.index}"
-    region = "nyc2"
-    size = "4gb"
-    backups = false
-    user_data = "${data.template_file.node_user_data.rendered}"
-    ssh_keys = [7093539]
+resource "aws_instance" "rancher_node" {
+  count = "2"
+  ami           = "ami-6d1c2007"
+  instance_type = "m4.large"
+
+  tags {
+    Name = "William-Swarm-node-${count.index}"
+  }
+  user_data = "${file("user-data-node-non-dynamic.txt")}"
+  key_name = "william"
+  vpc_security_group_ids =  ["sg-eb4f278e","sg-48efe630"]
+
 }
