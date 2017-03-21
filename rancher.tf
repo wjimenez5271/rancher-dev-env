@@ -5,7 +5,7 @@ provider "aws" {
 }
 
 resource "aws_instance" "server" {
-  ami           = "ami-6d1c2007"
+  ami           = "ami-7ac6491a"
   instance_type = "m4.large"
 
   tags {
@@ -43,7 +43,7 @@ data "template_file" "node_user_data" {
 
 resource "aws_instance" "rancher_node" {
   count = "2"
-  ami           = "ami-6d1c2007"
+  ami           = "ami-7ac6491a"
   instance_type = "m4.large"
 
   tags {
