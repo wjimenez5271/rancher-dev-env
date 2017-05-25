@@ -17,7 +17,7 @@ resource "digitalocean_droplet" "server" {
     ssh_keys = [7093539]
 }
 
-provider "rancher" {
+/*provider "rancher" {
   api_url = "http://${digitalocean_droplet.server.ipv4_address}:8080"
 }
 
@@ -33,21 +33,21 @@ resource "rancher_registration_token" "default" {
   name = "default_token"
   description = "Registration token for the env1 environment"
   environment_id = "${rancher_environment.default.id}"
-}
+}*/
 
 data "template_file" "node_user_data" {
     template = "${file("user-data-node.tpl")}"
     vars {
-        rancher_registration_cmd = "${rancher_registration_token.default.command}"
+        rancher_registration_cmd = "docker pull rancher/agent:v1.2.1"
     }
 }
 
 resource "digitalocean_droplet" "rancher_node" {
     count = "2"
     image = "ubuntu-16-04-x64"
-    name = "rancher_node${count.index}"
+    name = "rancher-node${count.index}"
     region = "nyc2"
-    size = "4gb"
+    size = "2gb"
     backups = false
     user_data = "${data.template_file.node_user_data.rendered}"
     ssh_keys = [7093539]
