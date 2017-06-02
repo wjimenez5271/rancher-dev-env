@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+# This version assumes ubuntu 
+
 # Set Hostname
 uuid="$(cat /sys/class/net/*/address | head -n 1 |sed -r 's/[:]+/-/g')"
 node_hostname=rancher-node-$uuid
